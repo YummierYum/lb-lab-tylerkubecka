@@ -42,7 +42,8 @@ partA.txt:
 	ls -lrR ~/cs429 > partA.txt
 
 partB.txt:
-# STUDENT TODO: Put your commands for part B here.
+	man man > partB.txt
+	man grep >> partB.txt
 
 # This target compiles the main runner executable.
 c: runner

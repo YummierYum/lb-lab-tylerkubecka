@@ -1,0 +1,1029 @@
+MAN(1)                                              Manual pager utils                                              MAN(1)
+
+NAME
+       man - an interface to the on-line reference manuals
+
+SYNOPSIS
+       man [-C file] [-d] [-D] [--warnings[=warnings]] [-R encoding] [-L locale] [-m system[,...]] [-M path] [-S list] [-e
+       extension] [-i|-I] [--regex|--wildcard] [--names-only] [-a] [-u] [--no-subpages] [-P pager] [-r  prompt]  [-7]  [-E
+       encoding] [--no-hyphenation] [--no-justification] [-p string] [-t] [-T[device]] [-H[browser]] [-X[dpi]] [-Z] [[sec‐
+       tion] page[.section] ...] ...
+       man -k [apropos options] regexp ...
+       man -K [-w|-W] [-S list] [-i|-I] [--regex] [section] term ...
+       man -f [whatis options] page ...
+       man -l [-C file] [-d] [-D] [--warnings[=warnings]] [-R encoding] [-L locale] [-P pager] [-r prompt] [-7] [-E encod‐
+       ing] [-p string] [-t] [-T[device]] [-H[browser]] [-X[dpi]] [-Z] file ...
+       man -w|-W [-C file] [-d] [-D] page ...
+       man -c [-C file] [-d] [-D] page ...
+       man [-?V]
+
+DESCRIPTION
+       man  is  the  system's manual pager.  Each page argument given to man is normally the name of a program, utility or
+       function.  The manual page associated with each of these arguments is then found and displayed.  A section, if pro‐
+       vided,  will  direct man to look only in that section of the manual.  The default action is to search in all of the
+       available sections following a pre-defined order ("1 n l 8 3 2 3posix 3pm 3perl 3am 5 4 9 6 7" by  default,  unless
+       overridden  by  the  SECTION directive in /etc/manpath.config), and to show only the first page found, even if page
+       exists in several sections.
+
+       The table below shows the section numbers of the manual followed by the types of pages they contain.
+
+       1   Executable programs or shell commands
+       2   System calls (functions provided by the kernel)
+       3   Library calls (functions within program libraries)
+       4   Special files (usually found in /dev)
+       5   File formats and conventions eg /etc/passwd
+       6   Games
+       7   Miscellaneous (including macro packages and conventions), e.g. man(7), groff(7)
+       8   System administration commands (usually only for root)
+       9   Kernel routines [Non standard]
+
+       A manual page consists of several sections.
+
+       Conventional section names include NAME, SYNOPSIS, CONFIGURATION, DESCRIPTION, OPTIONS, EXIT STATUS,  RETURN VALUE,
+       ERRORS, ENVIRONMENT, FILES, VERSIONS, CONFORMING TO, NOTES, BUGS, EXAMPLE, AUTHORS, and SEE ALSO.
+
+       The following conventions apply to the SYNOPSIS section and can be used as a guide in other sections.
+
+       bold text          type exactly as shown.
+       italic text        replace with appropriate argument.
+       [-abc]             any or all arguments within [ ] are optional.
+       -a|-b              options delimited by | cannot be used together.
+       argument ...       argument is repeatable.
+       [expression] ...   entire expression within [ ] is repeatable.
+
+       Exact  rendering  may  vary  depending  on the output device.  For instance, man will usually not be able to render
+       italics when running in a terminal, and will typically use underlined or coloured text instead.
+
+       The command or function illustration is a pattern that should match all possible invocations.  In some cases it  is
+       advisable to illustrate several exclusive invocations as is shown in the SYNOPSIS section of this manual page.
+
+EXAMPLES
+       man ls
+           Display the manual page for the item (program) ls.
+
+       man man.7
+           Display the manual page for macro package man from section 7.
+
+       man -a intro
+           Display, in succession, all of the available intro manual pages contained within the manual.  It is possible to
+           quit between successive displays or skip any of them.
+
+       man -t alias | lpr -Pps
+           Format the manual page referenced by `alias', usually a shell manual page, into the default troff or groff for‐
+           mat  and  pipe  it  to  the  printer named ps.  The default output for groff is usually PostScript.  man --help
+           should advise as to which processor is bound to the -t option.
+
+       man -l -Tdvi ./foo.1x.gz > ./foo.1x.dvi
+           This command will decompress and format the nroff source manual page  ./foo.1x.gz  into  a  device  independent
+           (dvi)  file.  The redirection is necessary as the -T flag causes output to be directed to stdout with no pager.
+           The output could be viewed with a program such as xdvi or further processed into  PostScript  using  a  program
+           such as dvips.
+
+       man -k printf
+           Search  the  short  descriptions and manual page names for the keyword printf as regular expression.  Print out
+           any matches.  Equivalent to apropos printf.
+
+       man -f smail
+           Lookup the manual pages referenced by smail and print out the short descriptions of any found.   Equivalent  to
+           whatis smail.
+
+OVERVIEW
+       Many  options  are  available  to man in order to give as much flexibility as possible to the user.  Changes can be
+       made to the search path, section order, output processor, and other behaviours and operations detailed below.
+
+       If set, various environment variables are interrogated to determine the operation of man.  It is  possible  to  set
+       the  `catch  all'  variable $MANOPT to any string in command line format with the exception that any spaces used as
+       part of an option's argument must be escaped (preceded by a backslash).  man will parse $MANOPT  prior  to  parsing
+       its own command line.  Those options requiring an argument will be overridden by the same options found on the com‐
+       mand line.  To reset all of the options set in $MANOPT, -D can be specified as the  initial  command  line  option.
+       This will allow man to `forget' about the options specified in $MANOPT although they must still have been valid.
+
+       The  manual  pager  utilities packaged as man-db make extensive use of index database caches.  These caches contain
+       information such as where each manual page can be found on the filesystem and  what  its  whatis  (short  one  line
+       description  of  the  man  page) contains, and allow man to run faster than if it had to search the filesystem each
+       time to find the appropriate manual page.  If requested using the -u option, man will ensure that the caches remain
+       consistent, which can obviate the need to manually run software to update traditional whatis text databases.
+
+       If  man  cannot  find a mandb initiated index database for a particular manual page hierarchy, it will still search
+       for the requested manual pages, although file globbing will be necessary  to  search  within  that  hierarchy.   If
+       whatis  or  apropos  fails  to  find an index it will try to extract information from a traditional whatis database
+       instead.
+
+       These utilities support compressed source nroff files having, by default, the extensions of .Z, .z and .gz.  It  is
+       possible  to  deal  with  any  compression extension, but this information must be known at compile time.  Also, by
+       default, any cat pages  produced  are  compressed  using  gzip.   Each  `global'  manual  page  hierarchy  such  as
+       /usr/share/man or /usr/X11R6/man may have any directory as its cat page hierarchy.  Traditionally the cat pages are
+       stored under the same hierarchy as the man pages, but for reasons such as those specified  in  the  File  Hierarchy
+       Standard  (FHS),  it may be better to store them elsewhere.  For details on how to do this, please read manpath(5).
+       For details on why to do this, read the standard.
+
+       International support is available with this package.  Native language manual pages are accessible (if available on
+       your  system)  via  use of locale functions.  To activate such support, it is necessary to set either $LC_MESSAGES,
+       $LANG or another system dependent environment variable to your language locale,  usually  specified  in  the  POSIX
+       1003.1 based format:
+
+       <language>[_<territory>[.<character-set>[,<version>]]]
+
+       If  the  desired  page  is available in your locale, it will be displayed in lieu of the standard (usually American
+       English) page.
+
+       Support for international message catalogues is also featured in this package and can be activated in the same way,
+       again  if  available.   If you find that the manual pages and message catalogues supplied with this package are not
+       available in your native language and you would like to supply them, please contact  the  maintainer  who  will  be
+       coordinating such activity.
+
+       For information regarding other features and extensions available with this manual pager, please read the documents
+       supplied with the package.
+
+DEFAULTS
+       man will search for the desired manual pages within the index database caches. If the -u option is given,  a  cache
+       consistency check is performed to ensure the databases accurately reflect the filesystem.  If this option is always
+       given, it is not generally necessary to run mandb after the caches are initially created, unless  a  cache  becomes
+       corrupt.   However,  the  cache consistency check can be slow on systems with many manual pages installed, so it is
+       not performed by default, and system administrators may wish to run mandb every week or so  to  keep  the  database
+       caches  fresh.   To  forestall  problems  caused by outdated caches, man will fall back to file globbing if a cache
+       lookup fails, just as it would if no cache was present.
+
+       Once a manual page has been located, a check is performed to find out if a relative preformatted `cat' file already
+       exists  and  is newer than the nroff file.  If it does and is, this preformatted file is (usually) decompressed and
+       then displayed, via use of a pager.  The pager can be specified in a number of ways, or else will fall  back  to  a
+       default is used (see option -P for details).  If no cat is found or is older than the nroff file, the nroff is fil‐
+       tered through various programs and is shown immediately.
+
+       If a cat file can be produced (a relative cat directory exists and has appropriate permissions), man will  compress
+       and store the cat file in the background.
+
+       The  filters  are deciphered by a number of means.  Firstly, the command line option -p or the environment variable
+       $MANROFFSEQ is interrogated.  If -p was not used and the environment variable was not set, the initial line of  the
+       nroff file is parsed for a preprocessor string.  To contain a valid preprocessor string, the first line must resem‐
+       ble
+
+       '\" <string>
+
+       where string can be any combination of letters described by option -p below.
+
+       If none of the above methods provide any filter information, a default set is used.
+
+       A formatting pipeline is formed from the filters and the primary formatter (nroff or [tg]roff  with  -t)  and  exe‐
+       cuted.   Alternatively, if an executable program mandb_nfmt (or mandb_tfmt with -t) exists in the man tree root, it
+       is executed instead.  It gets passed the manual source file, the preprocessor string,  and  optionally  the  device
+       specified with -T or -E as arguments.
+
+OPTIONS
+       Non  argument  options  that  are duplicated either on the command line, in $MANOPT, or both, are not harmful.  For
+       options that require an argument, each duplication will override the previous argument value.
+
+   General options
+       -C file, --config-file=file
+              Use this user configuration file rather than the default of ~/.manpath.
+
+       -d, --debug
+              Print debugging information.
+
+       -D, --default
+              This option is normally issued as the very first option and resets man's behaviour to its default.  Its  use
+              is  to  reset  those  options that may have been set in $MANOPT.  Any options that follow -D will have their
+              usual effect.
+
+       --warnings[=warnings]
+              Enable warnings from groff.  This may be used to perform sanity checks on the source text of  manual  pages.
+              warnings  is  a comma-separated list of warning names; if it is not supplied, the default is "mac".  See the
+              “Warnings” node in info groff for a list of available warning names.
+
+   Main modes of operation
+       -f, --whatis
+              Equivalent to whatis.  Display a short description from the manual page, if available.   See  whatis(1)  for
+              details.
+
+       -k, --apropos
+              Equivalent to apropos.  Search the short manual page descriptions for keywords and display any matches.  See
+              apropos(1) for details.
+
+       -K, --global-apropos
+              Search for text in all manual pages.  This is a brute-force search, and is likely to take some time; if  you
+              can,  you should specify a section to reduce the number of pages that need to be searched.  Search terms may
+              be simple strings (the default), or regular expressions if the --regex option is used.
+
+              Note that this searches the sources of the manual pages, not the rendered text, and  so  may  include  false
+              positives due to things like comments in source files.  Searching the rendered text would be much slower.
+
+       -l, --local-file
+              Activate `local' mode.  Format and display local manual files instead of searching through the system's man‐
+              ual collection.  Each manual page argument will be interpreted as an nroff source file in the  correct  for‐
+              mat.   No  cat  file is produced.  If '-' is listed as one of the arguments, input will be taken from stdin.
+              When this option is not used, and man fails to find the page required, before displaying the error  message,
+              it  attempts  to  act  as if this option was supplied, using the name as a filename and looking for an exact
+              match.
+
+       -w, --where, --path, --location
+              Don't actually display the manual pages, but do print the location(s) of the source nroff files  that  would
+              be formatted.
+
+       -W, --where-cat, --location-cat
+              Don't  actually  display  the manual pages, but do print the location(s) of the cat files that would be dis‐
+              played.  If -w and -W are both specified, print both separated by a space.
+
+       -c, --catman
+              This option is not for general use and should only be used by the catman program.
+
+       -R encoding, --recode=encoding
+              Instead of formatting the manual page in the usual way, output its source converted to the specified  encod‐
+              ing.   If  you already know the encoding of the source file, you can also use manconv(1) directly.  However,
+              this option allows you to convert several manual pages to a single encoding  without  having  to  explicitly
+              state  the  encoding  of  each, provided that they were already installed in a structure similar to a manual
+              page hierarchy.
+
+   Finding manual pages
+       -L locale, --locale=locale
+              man will normally determine your current locale by a call to the C function setlocale(3) which  interrogates
+              various  environment  variables,  possibly  including  $LC_MESSAGES  and $LANG.  To temporarily override the
+              determined value, use this option to supply a locale string directly to man.  Note that  it  will  not  take
+              effect until the search for pages actually begins.  Output such as the help message will always be displayed
+              in the initially determined locale.
+
+       -m system[,...], --systems=system[,...]
+              If this system has access to other operating system's manual pages, they can be accessed using this  option.
+              To search for a manual page from NewOS's manual page collection, use the option -m NewOS.
+
+              The system specified can be a combination of comma delimited operating system names.  To include a search of
+              the native operating system's manual pages, include the system name man in the argument string.  This option
+              will override the $SYSTEM environment variable.
+
+       -M path, --manpath=path
+              Specify  an  alternate  manpath  to use.  By default, man uses manpath derived code to determine the path to
+              search.  This option overrides the $MANPATH environment variable and causes option -m to be ignored.
+
+              A path specified as a manpath must be the root of a  manual  page  hierarchy  structured  into  sections  as
+              described  in the man-db manual (under "The manual page system").  To view manual pages outside such hierar‐
+              chies, see the -l option.
+
+       -S list, -s list, --sections=list
+              List is a colon- or comma-separated list of `order specific' manual sections to search.  This  option  over‐
+              rides the $MANSECT environment variable.  (The -s spelling is for compatibility with System V.)
+
+       -e sub-extension, --extension=sub-extension
+              Some  systems incorporate large packages of manual pages, such as those that accompany the Tcl package, into
+              the main manual page hierarchy.  To get around the problem of having two manual pages  with  the  same  name
+              such  as  exit(3),  the Tcl pages were usually all assigned to section l.  As this is unfortunate, it is now
+              possible to put the pages in the correct section, and to assign a specific  `extension'  to  them,  in  this
+              case, exit(3tcl).  Under normal operation, man will display exit(3) in preference to exit(3tcl).  To negoti‐
+              ate this situation and to avoid having to know which section the page you require resides in, it is now pos‐
+              sible  to give man a sub-extension string indicating which package the page must belong to.  Using the above
+              example, supplying the option -e tcl to man will restrict the search to pages having an extension of *tcl.
+
+       -i, --ignore-case
+              Ignore case when searching for manual pages.  This is the default.
+
+       -I, --match-case
+              Search for manual pages case-sensitively.
+
+       --regex
+              Show all pages with any part of either their names or their descriptions matching each page  argument  as  a
+              regular expression, as with apropos(1).  Since there is usually no reasonable way to pick a "best" page when
+              searching for a regular expression, this option implies -a.
+
+       --wildcard
+              Show all pages with any part of either their names or their descriptions matching each page  argument  using
+              shell-style  wildcards,  as  with  apropos(1)  --wildcard.   The page argument must match the entire name or
+              description, or match on word boundaries in the description.  Since there is usually no  reasonable  way  to
+              pick a "best" page when searching for a wildcard, this option implies -a.
+
+       --names-only
+              If  the  --regex  or  --wildcard  option  is  used,  match  only  page names, not page descriptions, as with
+              whatis(1).  Otherwise, no effect.
+
+       -a, --all
+              By default, man will exit after displaying the most suitable manual page it finds.  Using this option forces
+              man to display all the manual pages with names that match the search criteria.
+
+       -u, --update
+              This  option  causes man to perform an `inode level' consistency check on its database caches to ensure that
+              they are an accurate representation of the filesystem.  It  will  only  have  a  useful  effect  if  man  is
+              installed with the setuid bit set.
+
+       --no-subpages
+              By  default, man will try to interpret pairs of manual page names given on the command line as equivalent to
+              a single manual page name containing a hyphen or an underscore.  This supports the common  pattern  of  pro‐
+              grams  that  implement  a  number of subcommands, allowing them to provide manual pages for each that can be
+              accessed using similar syntax as would be used to invoke the subcommands themselves.  For example:
+
+                $ man -aw git diff
+                /usr/share/man/man1/git-diff.1.gz
+
+              To disable this behaviour, use the --no-subpages option.
+
+                $ man -aw --no-subpages git diff
+                /usr/share/man/man1/git.1.gz
+                /usr/share/man/man3/Git.3pm.gz
+                /usr/share/man/man1/diff.1.gz
+
+   Controlling formatted output
+       -P pager, --pager=pager
+              Specify which output pager to use.  By default, man uses pager, falling back to cat if pager is not found or
+              is  not  executable.   This option overrides the $MANPAGER environment variable, which in turn overrides the
+              $PAGER environment variable.  It is not used in conjunction with -f or -k.
+
+              The value may be a simple command name or a command with arguments, and may use shell quoting  (backslashes,
+              single  quotes, or double quotes).  It may not use pipes to connect multiple commands; if you need that, use
+              a wrapper script, which may take the file to display either as an argument or on standard input.
+
+       -r prompt, --prompt=prompt
+              If a recent version of less is used as the pager, man will attempt to  set  its  prompt  and  some  sensible
+              options.  The default prompt looks like
+
+               Manual page name(sec) line x
+
+              where  name  denotes the manual page name, sec denotes the section it was found under and x the current line
+              number.  This is achieved by using the $LESS environment variable.
+
+              Supplying -r with a string will override this default.  The string may contain the text $MAN_PN  which  will
+              be  expanded  to  the  name  of the current manual page and its section name surrounded by `(' and `)'.  The
+              string used to produce the default could be expressed as
+
+              \ Manual\ page\ \$MAN_PN\ ?ltline\ %lt?L/%L.:
+              byte\ %bB?s/%s..?\ (END):?pB\ %pB\\%..
+              (press h for help or q to quit)
+
+              It is broken into three lines here for the sake of readability only.  For its meaning see the less(1) manual
+              page.  The prompt string is first evaluated by the shell.  All double quotes, back-quotes and backslashes in
+              the prompt must be escaped by a preceding backslash.  The prompt string may end in an escaped $ which may be
+              followed by further options for less.  By default man sets the -ix8 options.
+
+              The $MANLESS environment variable described below may be used to set a default prompt string if none is sup‐
+              plied on the command line.
+
+       -7, --ascii
+              When viewing a pure ascii(7) manual page on a 7 bit terminal or terminal emulator, some characters  may  not
+              display correctly when using the latin1(7) device description with GNU nroff.  This option allows pure ascii
+              manual pages to be displayed in ascii with the latin1 device.  It will not translate any latin1  text.   The
+              following table shows the translations performed: some parts of it may only be displayed properly when using
+              GNU nroff's latin1(7) device.
+
+              Description           Octal   latin1   ascii
+              ─────────────────────────────────────────────
+              continuation hyphen    255      ‐        -
+              bullet (middle dot)    267      ·        o
+              acute accent           264      ´        '
+              multiplication sign    327      ×        x
+
+              If the latin1 column displays correctly, your terminal may be set up for latin1 characters and  this  option
+              is  not  necessary.   If  the  latin1  and ascii columns are identical, you are reading this page using this
+              option or man did not format this page using the latin1 device description.  If the latin1 column is missing
+              or corrupt, you may need to view manual pages with this option.
+
+              This option is ignored when using options -t, -H, -T, or -Z and may be useless for nroff other than GNU's.
+
+       -E encoding, --encoding=encoding
+              Generate  output  for a character encoding other than the default.  For backward compatibility, encoding may
+              be an nroff device such as ascii, latin1, or utf8 as well as a true character encoding such as UTF-8.
+
+       --no-hyphenation, --nh
+              Normally, nroff will automatically hyphenate text at line breaks even in words that do not contain  hyphens,
+              if  it  is  necessary  to  do so to lay out words on a line without excessive spacing.  This option disables
+              automatic hyphenation, so words will only be hyphenated if they already contain hyphens.
+
+              If you are writing a manual page and simply want to prevent nroff from hyphenating a word at an  inappropri‐
+              ate  point,  do  not use this option, but consult the nroff documentation instead; for instance, you can put
+              "\%" inside a word to indicate that it may be hyphenated at that point, or put "\%" at the start of  a  word
+              to prevent it from being hyphenated.
+
+       --no-justification, --nj
+              Normally,  nroff  will automatically justify text to both margins.  This option disables full justification,
+              leaving justified only to the left margin, sometimes called "ragged-right" text.
+
+              If you are writing a manual page and simply want to prevent nroff from justifying certain paragraphs, do not
+              use  this  option,  but consult the nroff documentation instead; for instance, you can use the ".na", ".nf",
+              ".fi", and ".ad" requests to temporarily disable adjusting and filling.
+
+       -p string, --preprocessor=string
+              Specify the sequence of preprocessors to run before nroff or troff/groff.  Not all installations will have a
+              full  set  of preprocessors.  Some of the preprocessors and the letters used to designate them are: eqn (e),
+              grap (g), pic (p), tbl (t), vgrind (v), refer (r).  This option overrides the $MANROFFSEQ environment  vari‐
+              able.  zsoelim is always run as the very first preprocessor.
+
+       -t, --troff
+              Use  groff -mandoc to format the manual page to stdout.  This option is not required in conjunction with -H,
+              -T, or -Z.
+
+       -T[device], --troff-device[=device]
+              This option is used to change groff (or possibly troff's) output to be suitable for a device other than  the
+              default.  It implies -t.  Examples (provided with Groff-1.17) include dvi, latin1, ps, utf8, X75 and X100.
+
+       -H[browser], --html[=browser]
+              This  option  will  cause  groff to produce HTML output, and will display that output in a web browser.  The
+              choice of browser is determined by the optional browser argument if one is provided, by the  $BROWSER  envi‐
+              ronment variable, or by a compile-time default if that is unset (usually lynx).  This option implies -t, and
+              will only work with GNU troff.
+
+       -X[dpi], --gxditview[=dpi]
+              This option displays the output of groff in a graphical window using the gxditview program.  The  dpi  (dots
+              per  inch)  may  be  75, 75-12, 100, or 100-12, defaulting to 75; the -12 variants use a 12-point base font.
+              This option implies -T with the X75, X75-12, X100, or X100-12 device respectively.
+
+       -Z, --ditroff
+              groff will run troff and then use an appropriate post-processor to produce output suitable  for  the  chosen
+              device.   If groff -mandoc is groff, this option is passed to groff and will suppress the use of a post-pro‐
+              cessor.  It implies -t.
+
+   Getting help
+       -?, --help
+              Print a help message and exit.
+
+       --usage
+              Print a short usage message and exit.
+
+       -V, --version
+              Display version information.
+
+EXIT STATUS
+       0      Successful program execution.
+
+       1      Usage, syntax or configuration file error.
+
+       2      Operational error.
+
+       3      A child process returned a non-zero exit status.
+
+       16     At least one of the pages/files/keywords didn't exist or wasn't matched.
+
+ENVIRONMENT
+       MANPATH
+              If $MANPATH is set, its value is used as the path to search for manual pages.
+
+       MANROFFOPT
+              The contents of $MANROFFOPT are added to the command line every  time  man  invokes  the  formatter  (nroff,
+              troff, or groff).
+
+       MANROFFSEQ
+              If  $MANROFFSEQ  is  set,  its  value is used to determine the set of preprocessors to pass each manual page
+              through.  The default preprocessor list is system dependent.
+
+       MANSECT
+              If $MANSECT is set, its value is a colon-delimited list of sections and it is used to determine which manual
+              sections  to  search and in what order.  The default is "1 n l 8 3 2 3posix 3pm 3perl 3am 5 4 9 6 7", unless
+              overridden by the SECTION directive in /etc/manpath.config.
+
+       MANPAGER, PAGER
+              If $MANPAGER or $PAGER is set ($MANPAGER is used in preference), its value is used as the name of  the  pro‐
+              gram  used to display the manual page.  By default, pager is used, falling back to cat if pager is not found
+              or is not executable.
+
+              The value may be a simple command name or a command with arguments, and may use shell quoting  (backslashes,
+              single  quotes, or double quotes).  It may not use pipes to connect multiple commands; if you need that, use
+              a wrapper script, which may take the file to display either as an argument or on standard input.
+
+       MANLESS
+              If $MANLESS is set, its value will be used as the default prompt string for the less pager,  as  if  it  had
+              been  passed  using the -r option (so any occurrences of the text $MAN_PN will be expanded in the same way).
+              For example, if you want to set the prompt string unconditionally to “my prompt  string”,  set  $MANLESS  to
+              ‘-Psmy prompt string’.  Using the -r option overrides this environment variable.
+
+       BROWSER
+              If $BROWSER is set, its value is a colon-delimited list of commands, each of which in turn is used to try to
+              start a web browser for man --html.  In each command, %s is replaced by a filename containing the HTML  out‐
+              put from groff, %% is replaced by a single percent sign (%), and %c is replaced by a colon (:).
+
+       SYSTEM If  $SYSTEM  is  set,  it  will  have  the same effect as if it had been specified as the argument to the -m
+              option.
+
+       MANOPT If $MANOPT is set, it will be parsed prior to man's command line and is expected to be in a similar  format.
+              As  all  of  the  other man specific environment variables can be expressed as command line options, and are
+              thus candidates for being included in $MANOPT it is expected that they will become obsolete.  N.B.  All spa‐
+              ces that should be interpreted as part of an option's argument must be escaped.
+
+       MANWIDTH
+              If $MANWIDTH is set, its value is used as the line length for which manual pages should be formatted.  If it
+              is not set, manual pages will be formatted with a line length appropriate to the current terminal (using the
+              value of $COLUMNS, an ioctl(2) if available, or falling back to 80 characters if neither is available).  Cat
+              pages will only be saved when the default formatting can be used, that is when the terminal line  length  is
+              between 66 and 80 characters.
+
+       MAN_KEEP_FORMATTING
+              Normally,  when output is not being directed to a terminal (such as to a file or a pipe), formatting charac‐
+              ters are discarded to make it easier to read the result without special tools.  However,  if  $MAN_KEEP_FOR‐
+              MATTING  is  set  to  any non-empty value, these formatting characters are retained.  This may be useful for
+              wrappers around man that can interpret formatting characters.
+
+       MAN_KEEP_STDERR
+              Normally, when output is being directed to a terminal (usually to a pager), any error output from  the  com‐
+              mand  used  to produce formatted versions of manual pages is discarded to avoid interfering with the pager's
+              display.  Programs such as groff often produce relatively minor error messages about typographical  problems
+              such  as  poor  alignment,  which are unsightly and generally confusing when displayed along with the manual
+              page.  However, some users want to see them anyway, so, if $MAN_KEEP_STDERR is set to any  non-empty  value,
+              error output will be displayed as usual.
+
+       LANG, LC_MESSAGES
+              Depending  on  system  and implementation, either or both of $LANG and $LC_MESSAGES will be interrogated for
+              the current message locale.  man will display its messages in that locale (if available).  See  setlocale(3)
+              for precise details.
+
+FILES
+       /etc/manpath.config
+              man-db configuration file.
+
+       /usr/share/man
+              A global manual page hierarchy.
+
+       /usr/share/man/index.(bt|db|dir|pag)
+              A traditional global index database cache.
+
+       /var/cache/man/index.(bt|db|dir|pag)
+              An FHS compliant global index database cache.
+
+SEE ALSO
+       apropos(1),  groff(1),  less(1),  manpath(1),  nroff(1), troff(1), whatis(1), zsoelim(1), setlocale(3), manpath(5),
+       ascii(7), latin1(7), man(7), catman(8), mandb(8), the man-db package manual, FSSTND
+
+HISTORY
+       1990, 1991 – Originally written by John W. Eaton (jwe@che.utexas.edu).
+
+       Dec 23 1992: Rik Faith (faith@cs.unc.edu) applied bug fixes supplied by Willem Kasdorp (wkasdo@nikhefk.nikef.nl).
+
+       30th April 1994 – 23rd February 2000: Wilf. (G.Wilford@ee.surrey.ac.uk) has been developing  and  maintaining  this
+       package with the help of a few dedicated people.
+
+       30th  October  1996  – 30th March 2001: Fabrizio Polacco <fpolacco@debian.org> maintained and enhanced this package
+       for the Debian project, with the help of all the community.
+
+       31st March 2001 – present day: Colin Watson <cjwatson@debian.org> is now developing and maintaining man-db.
+
+2.8.3                                                   2018-04-05                                                  MAN(1)
+GREP(1)                                                User Commands                                               GREP(1)
+
+NAME
+       grep, egrep, fgrep, rgrep - print lines matching a pattern
+
+SYNOPSIS
+       grep [OPTIONS] PATTERN [FILE...]
+       grep [OPTIONS] -e PATTERN ... [FILE...]
+       grep [OPTIONS] -f FILE ... [FILE...]
+
+DESCRIPTION
+       grep  searches  for PATTERN in each FILE.  A FILE of “-” stands for standard input.  If no FILE is given, recursive
+       searches examine the working directory, and nonrecursive searches read standard input.  By default, grep prints the
+       matching lines.
+
+       In  addition,  the  variant  programs  egrep,  fgrep  and  rgrep  are  the  same  as grep -E, grep -F, and grep -r,
+       respectively.  These variants are deprecated, but are provided for backward compatibility.
+
+OPTIONS
+   Generic Program Information
+       --help Output a usage message and exit.
+
+       -V, --version
+              Output the version number of grep and exit.
+
+   Matcher Selection
+       -E, --extended-regexp
+              Interpret PATTERN as an extended regular expression (ERE, see below).
+
+       -F, --fixed-strings
+              Interpret PATTERN as a list of fixed strings (instead of regular expressions), separated by newlines, any of
+              which is to be matched.
+
+       -G, --basic-regexp
+              Interpret PATTERN as a basic regular expression (BRE, see below).  This is the default.
+
+       -P, --perl-regexp
+              Interpret  the pattern as a Perl-compatible regular expression (PCRE).  This is experimental and grep -P may
+              warn of unimplemented features.
+
+   Matching Control
+       -e PATTERN, --regexp=PATTERN
+              Use PATTERN as the pattern.  If this option is used multiple times or  is  combined  with  the  -f  (--file)
+              option, search for all patterns given.  This option can be used to protect a pattern beginning with “-”.
+
+       -f FILE, --file=FILE
+              Obtain  patterns  from FILE, one per line.  If this option is used multiple times or is combined with the -e
+              (--regexp) option, search for all patterns given.  The empty file  contains  zero  patterns,  and  therefore
+              matches nothing.
+
+       -i, --ignore-case
+              Ignore case distinctions, so that characters that differ only in case match each other.
+
+       -v, --invert-match
+              Invert the sense of matching, to select non-matching lines.
+
+       -w, --word-regexp
+              Select  only  those lines containing matches that form whole words.  The test is that the matching substring
+              must either be at the beginning of the line, or preceded by a non-word constituent character.  Similarly, it
+              must  be  either  at  the end of the line or followed by a non-word constituent character.  Word-constituent
+              characters are letters, digits, and the underscore.  This option has no effect if -x is also specified.
+
+       -x, --line-regexp
+              Select only those matches that exactly match the whole line.  For a regular expression pattern, this is like
+              parenthesizing the pattern and then surrounding it with ^ and $.
+
+       -y     Obsolete synonym for -i.
+
+   General Output Control
+       -c, --count
+              Suppress  normal  output;  instead  print  a  count  of  matching  lines  for each input file.  With the -v,
+              --invert-match option (see below), count non-matching lines.
+
+       --color[=WHEN], --colour[=WHEN]
+              Surround the matched (non-empty) strings, matching lines, context lines,  file  names,  line  numbers,  byte
+              offsets,  and  separators  (for fields and groups of context lines) with escape sequences to display them in
+              color on the terminal.  The colors are defined by the  environment  variable  GREP_COLORS.   The  deprecated
+              environment  variable GREP_COLOR is still supported, but its setting does not have priority.  WHEN is never,
+              always, or auto.
+
+       -L, --files-without-match
+              Suppress normal output; instead print the name of each input file from which no output would  normally  have
+              been printed.  The scanning will stop on the first match.
+
+       -l, --files-with-matches
+              Suppress normal output; instead print the name of each input file from which output would normally have been
+              printed.  The scanning will stop on the first match.
+
+       -m NUM, --max-count=NUM
+              Stop reading a file after NUM matching lines.  If the input is standard input from a regular file,  and  NUM
+              matching  lines  are  output,  grep  ensures  that  the  standard input is positioned to just after the last
+              matching line before exiting, regardless of the presence of trailing context lines.  This enables a  calling
+              process  to  resume  a  search.   When  grep stops after NUM matching lines, it outputs any trailing context
+              lines.  When the -c or --count option is also used, grep does not output a count greater than NUM.  When the
+              -v or --invert-match option is also used, grep stops after outputting NUM non-matching lines.
+
+       -o, --only-matching
+              Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line.
+
+       -q, --quiet, --silent
+              Quiet;  do  not write anything to standard output.  Exit immediately with zero status if any match is found,
+              even if an error was detected.  Also see the -s or --no-messages option.
+
+       -s, --no-messages
+              Suppress error messages about nonexistent or unreadable files.
+
+   Output Line Prefix Control
+       -b, --byte-offset
+              Print the 0-based byte offset within the input file before each line of output.  If -o (--only-matching)  is
+              specified, print the offset of the matching part itself.
+
+       -H, --with-filename
+              Print the file name for each match.  This is the default when there is more than one file to search.
+
+       -h, --no-filename
+              Suppress  the  prefixing  of file names on output.  This is the default when there is only one file (or only
+              standard input) to search.
+
+       --label=LABEL
+              Display input actually coming from standard input as input coming  from  file  LABEL.   This  is  especially
+              useful  when implementing tools like zgrep, e.g., gzip -cd foo.gz | grep --label=foo -H something.  See also
+              the -H option.
+
+       -n, --line-number
+              Prefix each line of output with the 1-based line number within its input file.
+
+       -T, --initial-tab
+              Make sure that the first character of actual line content lies on a tab stop, so that the alignment of  tabs
+              looks  normal.   This  is useful with options that prefix their output to the actual content: -H,-n, and -b.
+              In order to improve the probability that lines from a single file will all start at the  same  column,  this
+              also causes the line number and byte offset (if present) to be printed in a minimum size field width.
+
+       -u, --unix-byte-offsets
+              Report  Unix-style byte offsets.  This switch causes grep to report byte offsets as if the file were a Unix-
+              style text file, i.e., with CR characters stripped off.  This will produce results identical to running grep
+              on  a  Unix machine.  This option has no effect unless -b option is also used; it has no effect on platforms
+              other than MS-DOS and MS-Windows.
+
+       -Z, --null
+              Output a zero byte (the ASCII NUL character) instead of the character that normally  follows  a  file  name.
+              For  example,  grep  -lZ outputs a zero byte after each file name instead of the usual newline.  This option
+              makes the output unambiguous, even in  the  presence  of  file  names  containing  unusual  characters  like
+              newlines.   This  option  can  be  used  with  commands like find -print0, perl -0, sort -z, and xargs -0 to
+              process arbitrary file names, even those that contain newline characters.
+
+   Context Line Control
+       -A NUM, --after-context=NUM
+              Print NUM lines of trailing context after matching lines.  Places a line containing a group  separator  (--)
+              between  contiguous  groups  of  matches.   With  the -o or --only-matching option, this has no effect and a
+              warning is given.
+
+       -B NUM, --before-context=NUM
+              Print NUM lines of leading context before matching lines.  Places a line containing a group  separator  (--)
+              between  contiguous  groups  of  matches.   With  the -o or --only-matching option, this has no effect and a
+              warning is given.
+
+       -C NUM, -NUM, --context=NUM
+              Print NUM lines of output context.  Places a line containing  a  group  separator  (--)  between  contiguous
+              groups of matches.  With the -o or --only-matching option, this has no effect and a warning is given.
+
+   File and Directory Selection
+       -a, --text
+              Process a binary file as if it were text; this is equivalent to the --binary-files=text option.
+
+       --binary-files=TYPE
+              If  a  file's  data or metadata indicate that the file contains binary data, assume that the file is of type
+              TYPE.  Non-text bytes indicate binary data; these are either output bytes that are  improperly  encoded  for
+              the current locale, or null input bytes when the -z option is not given.
+
+              By  default, TYPE is binary, and when grep discovers that a file is binary it suppresses any further output,
+              and instead outputs either a one-line message saying that a binary file matches, or no message if  there  is
+              no match.
+
+              If  TYPE  is  without-match,  when grep discovers that a file is binary it assumes that the rest of the file
+              does not match; this is equivalent to the -I option.
+
+              If TYPE is text, grep processes a binary file as if it were text; this is equivalent to the -a option.
+
+              When type is binary, grep may treat non-text bytes as line terminators even without  the  -z  option.   This
+              means  choosing  binary  versus text can affect whether a pattern matches a file.  For example, when type is
+              binary the pattern q$ might match q immediately followed by a null byte, even though  this  is  not  matched
+              when type is text.  Conversely, when type is binary the pattern . (period) might not match a null byte.
+
+              Warning:  The  -a  option  might output binary garbage, which can have nasty side effects if the output is a
+              terminal and if the terminal driver interprets some of it as commands.  On  the  other  hand,  when  reading
+              files whose text encodings are unknown, it can be helpful to use -a or to set LC_ALL='C' in the environment,
+              in order to find more matches even if the matches are unsafe for direct display.
+
+       -D ACTION, --devices=ACTION
+              If an input file is a device, FIFO or socket, use ACTION to process it.  By default, ACTION is  read,  which
+              means  that  devices  are read just as if they were ordinary files.  If ACTION is skip, devices are silently
+              skipped.
+
+       -d ACTION, --directories=ACTION
+              If an input file is a directory, use ACTION  to  process  it.   By  default,  ACTION  is  read,  i.e.,  read
+              directories  just  as if they were ordinary files.  If ACTION is skip, silently skip directories.  If ACTION
+              is recurse, read all files under each directory, recursively, following symbolic links only if they  are  on
+              the command line.  This is equivalent to the -r option.
+
+       --exclude=GLOB
+              Skip any command-line file with a name suffix that matches the pattern GLOB, using wildcard matching; a name
+              suffix is either the whole name, or any suffix starting after a /  and  before  a  +non-/.   When  searching
+              recursively,  skip  any subfile whose base name matches GLOB; the base name is the part after the last /.  A
+              pattern can use *, ?, and [...]  as wildcards, and \ to quote a wildcard or backslash character literally.
+
+       --exclude-from=FILE
+              Skip files whose base name matches any of the file-name globs read from FILE  (using  wildcard  matching  as
+              described under --exclude).
+
+       --exclude-dir=GLOB
+              Skip  any  command-line  directory  with  a  name  suffix  that  matches  the  pattern GLOB.  When searching
+              recursively, skip any subdirectory whose base name matches GLOB.  Ignore any redundant trailing  slashes  in
+              GLOB.
+
+       -I     Process   a   binary   file   as   if  it  did  not  contain  matching  data;  this  is  equivalent  to  the
+              --binary-files=without-match option.
+
+       --include=GLOB
+              Search only files whose base name matches GLOB (using wildcard matching as described under --exclude).
+
+       -r, --recursive
+              Read all files under each directory, recursively, following symbolic links only if they are on  the  command
+              line.   Note  that  if no file operand is given, grep searches the working directory.  This is equivalent to
+              the -d recurse option.
+
+       -R, --dereference-recursive
+              Read all files under each directory, recursively.  Follow all symbolic links, unlike -r.
+
+   Other Options
+       --line-buffered
+              Use line buffering on output.  This can cause a performance penalty.
+
+       -U, --binary
+              Treat the file(s) as binary.  By default, under MS-DOS and MS-Windows, grep guesses whether a file  is  text
+              or  binary  as  described for the --binary-files option.  If grep decides the file is a text file, it strips
+              the CR characters from the original file contents (to make regular expressions with ^ and $ work correctly).
+              Specifying  -U  overrules  this guesswork, causing all files to be read and passed to the matching mechanism
+              verbatim; if the file is a text file with CR/LF pairs at the end of each line, this will cause some  regular
+              expressions to fail.  This option has no effect on platforms other than MS-DOS and MS-Windows.
+
+       -z, --null-data
+              Treat  input and output data as sequences of lines, each terminated by a zero byte (the ASCII NUL character)
+              instead of a newline.  Like the -Z or --null option, this option can be used with commands like sort  -z  to
+              process arbitrary file names.
+
+REGULAR EXPRESSIONS
+       A regular expression is a pattern that describes a set of strings.  Regular expressions are constructed analogously
+       to arithmetic expressions, by using various operators to combine smaller expressions.
+
+       grep understands three different versions of regular expression syntax: “basic” (BRE), “extended” (ERE) and  “perl”
+       (PCRE).   In  GNU  grep  there is no difference in available functionality between basic and extended syntaxes.  In
+       other implementations, basic regular expressions are less powerful.  The following description applies to  extended
+       regular  expressions; differences for basic regular expressions are summarized afterwards.  Perl-compatible regular
+       expressions give additional functionality, and are documented in pcresyntax(3) and pcrepattern(3), but work only if
+       PCRE is available in the system.
+
+       The  fundamental  building  blocks  are  the  regular  expressions that match a single character.  Most characters,
+       including all letters and digits, are regular expressions that match themselves.  Any meta-character  with  special
+       meaning may be quoted by preceding it with a backslash.
+
+       The period . matches any single character.
+
+   Character Classes and Bracket Expressions
+       A bracket expression is a list of characters enclosed by [ and ].  It matches any single character in that list; if
+       the first character of the list is the caret ^ then it matches any character not in the  list.   For  example,  the
+       regular expression [0123456789] matches any single digit.
+
+       Within  a  bracket expression, a range expression consists of two characters separated by a hyphen.  It matches any
+       single character that sorts between the two characters,  inclusive,  using  the  locale's  collating  sequence  and
+       character  set.  For example, in the default C locale, [a-d] is equivalent to [abcd].  Many locales sort characters
+       in dictionary order, and in these locales [a-d] is typically not equivalent to [abcd]; it might  be  equivalent  to
+       [aBbCcDd],  for example.  To obtain the traditional interpretation of bracket expressions, you can use the C locale
+       by setting the LC_ALL environment variable to the value C.
+
+       Finally, certain named classes of characters are predefined within bracket expressions, as  follows.   Their  names
+       are  self  explanatory,  and  they are [:alnum:], [:alpha:], [:cntrl:], [:digit:], [:graph:], [:lower:], [:print:],
+       [:punct:], [:space:], [:upper:], and [:xdigit:].  For example, [[:alnum:]] means the character class of numbers and
+       letters  in the current locale.  In the C locale and ASCII character set encoding, this is the same as [0-9A-Za-z].
+       (Note that the brackets in these class names are part of the symbolic names, and must be included  in  addition  to
+       the  brackets  delimiting  the bracket expression.)  Most meta-characters lose their special meaning inside bracket
+       expressions.  To include a literal ] place it first in the list.  Similarly,  to  include  a  literal  ^  place  it
+       anywhere but first.  Finally, to include a literal - place it last.
+
+   Anchoring
+       The caret ^ and the dollar sign $ are meta-characters that respectively match the empty string at the beginning and
+       end of a line.
+
+   The Backslash Character and Special Expressions
+       The symbols \< and \> respectively match the empty string at the beginning and  end  of  a  word.   The  symbol  \b
+       matches  the empty string at the edge of a word, and \B matches the empty string provided it's not at the edge of a
+       word.  The symbol \w is a synonym for [_[:alnum:]] and \W is a synonym for [^_[:alnum:]].
+
+   Repetition
+       A regular expression may be followed by one of several repetition operators:
+       ?      The preceding item is optional and matched at most once.
+       *      The preceding item will be matched zero or more times.
+       +      The preceding item will be matched one or more times.
+       {n}    The preceding item is matched exactly n times.
+       {n,}   The preceding item is matched n or more times.
+       {,m}   The preceding item is matched at most m times.  This is a GNU extension.
+       {n,m}  The preceding item is matched at least n times, but not more than m times.
+
+   Concatenation
+       Two regular expressions may be concatenated;  the  resulting  regular  expression  matches  any  string  formed  by
+       concatenating two substrings that respectively match the concatenated expressions.
+
+   Alternation
+       Two  regular expressions may be joined by the infix operator |; the resulting regular expression matches any string
+       matching either alternate expression.
+
+   Precedence
+       Repetition takes precedence over  concatenation,  which  in  turn  takes  precedence  over  alternation.   A  whole
+       expression may be enclosed in parentheses to override these precedence rules and form a subexpression.
+
+   Back References and Subexpressions
+       The back-reference \n, where n is a single digit, matches the substring previously matched by the nth parenthesized
+       subexpression of the regular expression.
+
+   Basic vs Extended Regular Expressions
+       In basic regular expressions the meta-characters ?, +, {, |, (, and ) lose their special meaning; instead  use  the
+       backslashed versions \?, \+, \{, \|, \(, and \).
+
+ENVIRONMENT VARIABLES
+       The behavior of grep is affected by the following environment variables.
+
+       The  locale  for category LC_foo is specified by examining the three environment variables LC_ALL, LC_foo, LANG, in
+       that order.  The first of these variables that is set specifies the locale.  For example, if LC_ALL is not set, but
+       LC_MESSAGES  is  set  to  pt_BR,  then the Brazilian Portuguese locale is used for the LC_MESSAGES category.  The C
+       locale is used if none of these environment variables are set, if the locale catalog is not installed, or  if  grep
+       was  not  compiled  with  national  language  support  (NLS).   The  shell command locale -a lists locales that are
+       currently available.
+
+       GREP_OPTIONS
+              This variable specifies default options to be placed in front of  any  explicit  options.   As  this  causes
+              problems  when  writing portable scripts, this feature will be removed in a future release of grep, and grep
+              warns if it is used.  Please use an alias or script instead.
+
+       GREP_COLOR
+              This variable specifies the color used to highlight matched (non-empty) text.  It is deprecated in favor  of
+              GREP_COLORS, but still supported.  The mt, ms, and mc capabilities of GREP_COLORS have priority over it.  It
+              can only specify the color used to highlight the matching non-empty text in any matching  line  (a  selected
+              line  when  the  -v command-line option is omitted, or a context line when -v is specified).  The default is
+              01;31, which means a bold red foreground text on the terminal's default background.
+
+       GREP_COLORS
+              Specifies the colors and other attributes used to highlight various parts of the output.   Its  value  is  a
+              colon-separated list of capabilities that defaults to ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36 with
+              the rv and ne boolean capabilities omitted (i.e., false).  Supported capabilities are as follows.
+
+              sl=    SGR substring for whole selected lines (i.e., matching lines  when  the  -v  command-line  option  is
+                     omitted,  or  non-matching lines when -v is specified).  If however the boolean rv capability and the
+                     -v command-line option are both specified, it applies to context matching lines instead.  The default
+                     is empty (i.e., the terminal's default color pair).
+
+              cx=    SGR  substring  for  whole context lines (i.e., non-matching lines when the -v command-line option is
+                     omitted, or matching lines when -v is specified).  If however the boolean rv capability  and  the  -v
+                     command-line  option  are  both  specified,  it  applies to selected non-matching lines instead.  The
+                     default is empty (i.e., the terminal's default color pair).
+
+              rv     Boolean value that reverses (swaps) the meanings of the sl= and cx= capabilities when the -v command-
+                     line option is specified.  The default is false (i.e., the capability is omitted).
+
+              mt=01;31
+                     SGR  substring  for  matching  non-empty text in any matching line (i.e., a selected line when the -v
+                     command-line option is omitted, or a context line when -v is specified).  Setting this is  equivalent
+                     to  setting  both  ms=  and mc= at once to the same value.  The default is a bold red text foreground
+                     over the current line background.
+
+              ms=01;31
+                     SGR substring for matching non-empty text in a selected  line.   (This  is  only  used  when  the  -v
+                     command-line option is omitted.)  The effect of the sl= (or cx= if rv) capability remains active when
+                     this kicks in.  The default is a bold red text foreground over the current line background.
+
+              mc=01;31
+                     SGR substring for matching non-empty text in a context line.  (This is only used when the -v command-
+                     line  option is specified.)  The effect of the cx= (or sl= if rv) capability remains active when this
+                     kicks in.  The default is a bold red text foreground over the current line background.
+
+              fn=35  SGR substring for file names prefixing any content line.  The default is a  magenta  text  foreground
+                     over the terminal's default background.
+
+              ln=32  SGR  substring  for  line numbers prefixing any content line.  The default is a green text foreground
+                     over the terminal's default background.
+
+              bn=32  SGR substring for byte offsets prefixing any content line.  The default is a  green  text  foreground
+                     over the terminal's default background.
+
+              se=36  SGR substring for separators that are inserted between selected line fields (:), between context line
+                     fields, (-), and between groups of adjacent lines  when  nonzero  context  is  specified  (--).   The
+                     default is a cyan text foreground over the terminal's default background.
+
+              ne     Boolean  value  that  prevents  clearing to the end of line using Erase in Line (EL) to Right (\33[K)
+                     each time a colorized item ends.  This is needed on terminals on which EL is not  supported.   It  is
+                     otherwise  useful  on terminals for which the back_color_erase (bce) boolean terminfo capability does
+                     not apply, when the chosen highlight colors do not affect the background, or when EL is too  slow  or
+                     causes too much flicker.  The default is false (i.e., the capability is omitted).
+
+              Note  that  boolean  capabilities  have no =...  part.  They are omitted (i.e., false) by default and become
+              true when specified.
+
+              See the Select Graphic Rendition (SGR) section in the documentation of the text terminal that  is  used  for
+              permitted  values and their meaning as character attributes.  These substring values are integers in decimal
+              representation and can be concatenated with semicolons.  grep takes care of assembling  the  result  into  a
+              complete  SGR  sequence (\33[...m).  Common values to concatenate include 1 for bold, 4 for underline, 5 for
+              blink, 7 for inverse, 39 for default foreground color, 30 to 37 for foreground colors, 90 to 97 for 16-color
+              mode  foreground  colors,  38;5;0  to  38;5;255  for  88-color and 256-color modes foreground colors, 49 for
+              default background color, 40 to 47 for background colors, 100 to 107 for 16-color  mode  background  colors,
+              and 48;5;0 to 48;5;255 for 88-color and 256-color modes background colors.
+
+       LC_ALL, LC_COLLATE, LANG
+              These variables specify the locale for the LC_COLLATE category, which determines the collating sequence used
+              to interpret range expressions like [a-z].
+
+       LC_ALL, LC_CTYPE, LANG
+              These variables specify the locale for the LC_CTYPE category, which determines the type of characters, e.g.,
+              which  characters  are  whitespace.   This category also determines the character encoding, that is, whether
+              text is encoded in UTF-8, ASCII, or some other encoding.  In the C  or  POSIX  locale,  all  characters  are
+              encoded as a single byte and every byte is a valid character.
+
+       LC_ALL, LC_MESSAGES, LANG
+              These  variables  specify  the  locale for the LC_MESSAGES category, which determines the language that grep
+              uses for messages.  The default C locale uses American English messages.
+
+       POSIXLY_CORRECT
+              If set, grep behaves as POSIX requires; otherwise,  grep  behaves  more  like  other  GNU  programs.   POSIX
+              requires  that  options  that  follow file names must be treated as file names; by default, such options are
+              permuted to the front of  the  operand  list  and  are  treated  as  options.   Also,  POSIX  requires  that
+              unrecognized options be diagnosed as “illegal”, but since they are not really against the law the default is
+              to diagnose them as “invalid”.  POSIXLY_CORRECT also disables _N_GNU_nonoption_argv_flags_, described below.
+
+       _N_GNU_nonoption_argv_flags_
+              (Here N is grep's numeric process ID.)  If the ith character of this environment variable's value is  1,  do
+              not  consider  the  ith operand of grep to be an option, even if it appears to be one.  A shell can put this
+              variable in the environment for each command it runs, specifying which operands are the results of file name
+              wildcard expansion and therefore should not be treated as options.  This behavior is available only with the
+              GNU C library, and only when POSIXLY_CORRECT is not set.
+
+EXIT STATUS
+       Normally the exit status is 0 if a line is selected, 1 if no lines were selected,  and  2  if  an  error  occurred.
+       However,  if  the  -q  or --quiet or --silent is used and a line is selected, the exit status is 0 even if an error
+       occurred.
+
+COPYRIGHT
+       Copyright 1998–2000, 2002, 2005–2017 Free Software Foundation, Inc.
+
+       This is free software; see the source for copying conditions.  There is NO warranty; not even  for  MERCHANTABILITY
+       or FITNESS FOR A PARTICULAR PURPOSE.
+
+BUGS
+   Reporting Bugs
+       Email bug reports to the bug-reporting address ⟨bug-grep@gnu.org⟩.  An email archive ⟨http://lists.gnu.org/mailman/
+       listinfo/bug-grep⟩ and a bug tracker ⟨http://debbugs.gnu.org/cgi/pkgreport.cgi?package=grep⟩ are available.
+
+   Known Bugs
+       Large repetition counts in the {n,m} construct may cause grep to use lots of memory.  In  addition,  certain  other
+       obscure regular expressions require exponential time and space, and may cause grep to run out of memory.
+
+       Back-references are very slow, and may require exponential time.
+
+SEE ALSO
+   Regular Manual Pages
+       awk(1),  cmp(1),  diff(1),  find(1),  gzip(1),  perl(1),  sed(1),  sort(1),  xargs(1),  zgrep(1), read(2), pcre(3),
+       pcresyntax(3), pcrepattern(3), terminfo(5), glob(7), regex(7).
+
+   POSIX Programmer's Manual Page
+       grep(1p).
+
+   Full Documentation
+       A complete manual ⟨http://www.gnu.org/software/grep/manual/⟩ is available.  If  the  info  and  grep  programs  are
+       properly installed at your site, the command
+
+              info grep
+
+       should give you access to the complete manual.
+
+NOTES
+       This man page is maintained only fitfully; the full documentation is often more up-to-date.
+
+GNU grep 3.1                                            2017-06-21                                                 GREP(1)
