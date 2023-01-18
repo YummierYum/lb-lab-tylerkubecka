@@ -1,0 +1,44 @@
+/u/tyandkub/cs429:
+total 4
+drwx------ 7 tyandkub under 4096 Jan 17 21:02 projects
+
+/u/tyandkub/cs429/projects:
+total 20
+drwx------ 2 tyandkub under 4096 Jan 17 21:02 proj5
+drwx------ 2 tyandkub under 4096 Jan 17 21:02 proj4
+drwx------ 2 tyandkub under 4096 Jan 17 21:02 proj3
+drwx------ 2 tyandkub under 4096 Jan 17 21:02 proj2
+drwx------ 3 tyandkub under 4096 Jan 17 21:18 proj1
+
+/u/tyandkub/cs429/projects/proj5:
+total 0
+
+/u/tyandkub/cs429/projects/proj4:
+total 0
+
+/u/tyandkub/cs429/projects/proj3:
+total 0
+
+/u/tyandkub/cs429/projects/proj2:
+total 0
+
+/u/tyandkub/cs429/projects/proj1:
+total 8
+-rw-r--r-- 1 tyandkub under 1463 Jan 17 21:18 partA.txt
+drwxr-xr-x 3 tyandkub under 4096 Jan 17 21:44 lb-lab-tylerkubecka
+
+/u/tyandkub/cs429/projects/proj1/lb-lab-tylerkubecka:
+total 52
+-rw-r--r-- 1 tyandkub under 2167 Jan 17 21:15 structs.h
+-rw-r--r-- 1 tyandkub under 1745 Jan 17 21:15 structs.c
+-rw-r--r-- 1 tyandkub under  105 Jan 17 21:15 strings.h
+-rw-r--r-- 1 tyandkub under 2644 Jan 17 21:15 strings.c
+-rw-r--r-- 1 tyandkub under 2002 Jan 17 21:15 README.md
+-rw-r--r-- 1 tyandkub under   62 Jan 17 21:15 pointers.h
+-rw-r--r-- 1 tyandkub under 4853 Jan 17 21:15 pointers.c
+-rw-r--r-- 1 tyandkub under  750 Jan 17 21:15 partB-ref-20.txt
+-rw-r--r-- 1 tyandkub under  771 Jan 17 21:15 partB-ref-18.txt
+-rw-r--r-- 1 tyandkub under    0 Jan 17 21:44 partA.txt
+-rw-r--r-- 1 tyandkub under 3084 Jan 17 21:15 Makefile
+-rw-r--r-- 1 tyandkub under 6220 Jan 17 21:15 main.c
+-rw-r--r-- 1 tyandkub under  903 Jan 17 21:15 debug.c
