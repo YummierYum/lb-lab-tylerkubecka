@@ -42,8 +42,8 @@ partA.txt:
 	ls -lrR ~/cs429 > partA.txt
 
 partB.txt:
-	man man > partB.txt
-	man grep >> partB.txt
+	man man | grep -m1 "DESCRIPTION" -A 4 > partB.txt
+	man grep | grep -m1 "DESCRIPTION" -A 3 >> partB.txt
 
 # This target compiles the main runner executable.
 c: runner
