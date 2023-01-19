@@ -64,15 +64,15 @@ runner: $(OBJS)
 
 # These are for testing each module individually.
 pointers: pointers.o
-	$(CC) $(CFLAGS) -DPOINTERS main.c pointers.c
+	$(CC) $(CFLAGS) -DPOINTERS main.c pointers.c -o runner
 	./runner
 
 strings: strings.o
-	$(CC) $(CFLAGS) -DSTRINGS main.c strings.c
+	$(CC) $(CFLAGS) -DSTRINGS main.c strings.c -o runner
 	./runner
 
 structs: structs.o
-	$(CC) $(CFLAGS) -DSTRUCTS main.c structs.c
+	$(CC) $(CFLAGS) -DSTRUCTS main.c structs.c -o runner
 	./runner
 
 # This target compiles the code and opens GDB for debugging.
