@@ -45,7 +45,7 @@ void strings_task_1(char *buffer) {
     buffer[3] = '2';
     buffer[4] = '9';
 
-    // STUDENT TODO: Replace this with your code.
+    buffer[5] = '\0';
 }
 
 /***************************************
@@ -63,8 +63,8 @@ void strings_task_1(char *buffer) {
  ***************************************/
 void strings_task_2(char *buffer) {
     // STUDENT TODO: Fix the loop condition.
-    for(int i = 0; i < sizeof(buffer); i++) {
-        // STUDENT TODO: Replace this with your code.
+    for(int i = 0; i < strlen(buffer); i++) {
+        buffer[i] = toupper(buffer[i]);
     }
 }
 
@@ -81,5 +81,7 @@ void strings_task_2(char *buffer) {
  ***************************************/
 char *strings_task_3(char *buffer) {
     // STUDENT TODO: Replace this with your code.
-    return NULL;
+    char *copystr = (char*) malloc((strlen(buffer) + 1) * sizeof(char));
+    strcpy(copystr, buffer);
+    return copystr;
 }
